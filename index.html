@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>باقة نجاح</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f6f7f4;--card:#fff;--ink:#1d2b3a;--muted:#5f6b76;--line:#cfd6dd;--green:#7cb342;--greenDark:#2e7d32}
+  *{box-sizing:border-box}
+  body{font-family:Tajawal,Tahoma,Arial,sans-serif;background:var(--bg);margin:0;padding:16px;color:var(--ink)}
+  .card{max-width:460px;margin:20px auto;background:var(--card);border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+  h1{font-size:23px;margin:0 0 8px}
+  p{line-height:1.8;margin:8px 0}
+  ul{margin:0;padding:0 20px;line-height:1.9}
+  label{display:block;margin:14px 0 6px;font-weight:700}
+  input{width:100%;padding:12px;font-size:16px;font-family:inherit;border:1px solid var(--line);border-radius:10px;direction:ltr;text-align:left}
+  button,a.btn{display:block;width:100%;text-align:center;margin-top:18px;padding:14px;font-size:17px;font-family:inherit;border:0;border-radius:10px;background:var(--green);color:#fff;cursor:pointer;text-decoration:none}
+  button:disabled{opacity:.6;cursor:default}
+  a.alt{background:#fff;color:#4e7d2b;border:1px solid var(--green)}
+  .muted{color:var(--muted);font-size:14px}
+  .err{color:#c62828;margin-top:10px;min-height:20px}
+  .offer{background:#fff4e5;border:1px solid #ffb74d;border-radius:10px;padding:10px 12px;margin:10px 0;color:#7a4a00}
+  .pill{display:inline-block;padding:4px 12px;border:1px solid var(--line);border-radius:999px;margin:3px;font-size:13px;color:#33414f;background:#fff}
+  .pill.apple{background:#000;color:#fff;border-color:#000;font-weight:700}
+  .center{text-align:center}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<div class="card" id="root"><p class="muted center">جارٍ التحميل...</p></div>
+
+<script>
+// رابط واجهة Apps Script (ينتهي بـ /exec)
+var API = 'https://script.google.com/macros/s/AKfycbwSHTE4TZz23T1S4dY8dV0AWM7J9f01n00LmKK5GXMm99_Cs6VwKO3Q6fbvdS5ENynl/exec';
+var IG = '@saif_alsalmi_';
+
+var root = document.getElementById('root');
+var params = new URLSearchParams(location.search);
+var info = null;
+
+function el(tag, attrs, text) {
+  var n = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+function clear() { while (root.firstChild) root.removeChild(root.firstChild); }
+function show(title, text, buttons, list) {
+  clear();
+  root.appendChild(el('h1', null, title));
+  if (text) root.appendChild(el('p', null, text));
+  if (list && list.length) {
+    var ul = el('ul');
+    list.forEach(function (t) { ul.appendChild(el('li', null, t)); });
+    root.appendChild(ul);
+  }
+  (buttons || []).forEach(function (b) {
+    var a = el('a', { 'class': 'btn' + (b.alt ? ' alt' : ''), href: b.href }, b.text);
+    root.appendChild(a);
+  });
+}
+function getJson(url) {
+  return fetch(url).then(function (r) { return r.json(); });
+}
+function loadInfo() {
+  return getJson(API + '?action=info').then(function (d) { info = d; return d; });
+}
+function homeUrl() { return location.origin + location.pathname; }
+
+// ---------- صفحة النموذج ----------
+function renderForm() {
+  clear();
+  root.appendChild(el('h1', null, info.name));
+  root.appendChild(el('p', null, 'أحياء الصف الثاني عشر – الفصل الأول: شروحات كاملة ومراجعات وحصص مرتبة، تشاهدها متى شئت.'));
+  var h = el('p', { style: 'margin:12px 0 4px' }); h.appendChild(el('b', null, 'ما الذي تحصل عليه مع الباقة؟')); root.appendChild(h);
+  var ul = el('ul');
+  [
+    'شروحات كاملة لجميع الدروس.',
+    'مناقشة في نهاية كل درس.',
+    'مراجعات في ختام كل وحدة.',
+    'إمكانية الرجوع إلى أي درس في أي وقت.',
+    'تستطيع مراجعة الأستاذ في أي وقت عبر إنستغرام ' + IG + ' أو عبر الهاتف ' + info.phone + '.',
+    'استمرار الحصص حتى نهاية الفصل دون انقطاع.',
+    'إن واجهتك أي مشكلة فتواصل مع الأستاذ مباشرة وسيتم حلّها.'
+  ].forEach(function (t) { ul.appendChild(el('li', null, t)); });
+  root.appendChild(ul);
+
+  if (info.offer) {
+    var o = el('div', { 'class': 'offer' });
+    var b = el('b', null, '🔥 عرض لفترة محدودة — خصم ' + info.label);
+    o.appendChild(b);
+    if (info.end) { o.appendChild(el('br')); o.appendChild(el('span', { style: 'font-size:14px' }, 'ينتهي العرض بتاريخ ' + info.end)); }
+    root.appendChild(o);
+    var pr = el('p'); pr.appendChild(document.createTextNode('السعر: '));
+    pr.appendChild(el('s', { style: 'color:#8a949e' }, info.original));
+    pr.appendChild(document.createTextNode(' '));
+    pr.appendChild(el('b', { style: 'font-size:20px;color:var(--greenDark)' }, info.price + ' ر.ع'));
+    root.appendChild(pr);
+  } else {
+    var p2 = el('p'); p2.appendChild(el('b', null, 'السعر: ' + info.price + ' ر.ع')); root.appendChild(p2);
+  }
+
+  root.appendChild(el('label', { 'for': 'e1' }, 'بريدك الإلكتروني (حساب Google / Gmail)'));
+  root.appendChild(el('input', { id: 'e1', type: 'email', placeholder: 'name@gmail.com', autocomplete: 'email' }));
+  root.appendChild(el('p', { 'class': 'muted', style: 'margin-top:6px' }, 'ملاحظة: النظام لا يقبل البريد الإلكتروني الوزاري، استخدم حساب Gmail شخصي.'));
+  root.appendChild(el('label', { 'for': 'e2' }, 'أعد كتابة البريد للتأكيد'));
+  root.appendChild(el('input', { id: 'e2', type: 'email', placeholder: 'name@gmail.com' }));
+  root.appendChild(el('p', { 'class': 'muted' }, 'ستُشارَك الحصص على هذا البريد بعد الدفع، فتأكد من كتابته بشكل صحيح.'));
+  root.appendChild(el('div', { 'class': 'err', id: 'err' }));
+  var btn = el('button', { id: 'btn', type: 'button' }, 'المتابعة إلى الدفع');
+  root.appendChild(btn);
+  root.appendChild(el('a', { id: 'pay', 'class': 'btn hide', target: '_blank', rel: 'noopener' }, 'اضغط هنا لإكمال الدفع'));
+
+  var box = el('div', { 'class': 'center', style: 'margin-top:16px' });
+  box.appendChild(el('p', { 'class': 'muted', style: 'margin:0 0 6px' }, '🔒 دفع آمن وسلس عبر بوابة ثواني'));
+  if (info.applePay) {
+    var ap = el('p', { style: 'margin:0 0 6px;font-size:15px' });
+    ap.appendChild(document.createTextNode('ادفع بلمسة واحدة عبر '));
+    ap.appendChild(el('b', null, 'Apple Pay'));
+    ap.appendChild(document.createTextNode(' على أجهزة آبل.'));
+    box.appendChild(ap);
+    box.appendChild(el('span', { 'class': 'pill apple' }, 'Apple Pay'));
+  }
+  ['Visa', 'Mastercard', 'مال'].forEach(function (t) { box.appendChild(el('span', { 'class': 'pill' }, t)); });
+  if (info.paypal) box.appendChild(el('span', { 'class': 'pill' }, 'PayPal'));
+  root.appendChild(box);
+
+  btn.addEventListener('click', go);
+}
+
+function go() {
+  var a = document.getElementById('e1').value.trim().toLowerCase();
+  var b = document.getElementById('e2').value.trim().toLowerCase();
+  var err = document.getElementById('err');
+  var btn = document.getElementById('btn');
+  err.textContent = '';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a)) { err.textContent = 'البريد غير صحيح'; return; }
+  if (a !== b) { err.textContent = 'البريدان غير متطابقين'; return; }
+  btn.disabled = true; btn.textContent = 'جارٍ التحويل إلى صفحة الدفع...';
+  fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'create', email: a }) })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d || !d.ok || !d.url) throw new Error('failed');
+      var l = document.getElementById('pay');
+      l.href = d.url; l.classList.remove('hide'); btn.classList.add('hide');
+    })
+    .catch(function () {
+      btn.disabled = false; btn.textContent = 'المتابعة إلى الدفع';
+      err.textContent = 'تعذر بدء الدفع، حاول مرة أخرى.';
+    });
+}
+
+// ---------- ما بعد الدفع ----------
+function checkStatus(ref, attempt) {
+  getJson(API + '?action=status&ref=' + encodeURIComponent(ref)).then(function (d) {
+    var s = d && d.status;
+    var lessons = (info && info.lessons) || 'https://drive.google.com/drive/shared-with-me';
+    var help = 'للمساعدة تواصل معي على إنستغرام ' + IG;
+    if (s === 'shared') {
+      show('تم الدفع بنجاح ✅', 'الحصص المسجلة جاهزة لك الآن.', [{ text: 'الانتقال إلى الحصص المسجلة', href: lessons }], [
+        'اضغط الزر أعلاه لفتح الحصص.',
+        'افتح الرابط بنفس البريد الذي سجّلته.',
+        'إذا لم تظهر الحصص فانتظر 5 دقائق ثم حدّث الصفحة.',
+        help
+      ]);
+    } else if (s === 'pending' && attempt < 6) {
+      setTimeout(function () { checkStatus(ref, attempt + 1); }, 4000);
+    } else if (s === 'pending') {
+      show('نتأكد من الدفع...', 'إن كنت أتممت الدفع فستصلك الحصص خلال دقائق.', [
+        { text: 'تحديث الصفحة', href: location.href, alt: true }
+      ], ['انتظر 5 دقائق على الأكثر ثم افتح الحصص.', help]);
+    } else if (s === 'cancelled' || s === 'expired') {
+      show('لم تكتمل عملية الدفع', 'لم يتم الدفع لهذه العملية. يمكنك المحاولة من جديد.', [{ text: 'رجوع', href: homeUrl() }]);
+    } else {
+      show('حدثت مشكلة', 'تواصل معي على إنستغرام ' + IG + ' وأرسل صورة إيصال الدفع لأحلّ الأمر مباشرة.', []);
+    }
+  }).catch(function () {
+    show('تعذر التحقق الآن', 'إن كنت أتممت الدفع فستصلك الحصص خلال دقائق. وإن لم تصل فتواصل معي على إنستغرام ' + IG + '.', [
+      { text: 'تحديث الصفحة', href: location.href, alt: true }
+    ]);
+  });
+}
+
+// ---------- التشغيل ----------
+loadInfo().then(function () {
+  if (params.get('done')) {
+    show('نتأكد من الدفع...', 'لحظات من فضلك.', []);
+    checkStatus(params.get('done'), 0);
+  } else if (params.get('cancel')) {
+    show('تم إلغاء عملية الدفع', 'لم يُخصم أي مبلغ. تستطيع العودة والمحاولة من جديد.', [{ text: 'رجوع', href: homeUrl() }]);
+  } else {
+    renderForm();
+  }
+}).catch(function () {
+  show('تعذر تحميل الصفحة', 'تأكد من اتصالك بالإنترنت ثم حدّث الصفحة.', [{ text: 'تحديث الصفحة', href: location.href }]);
+});
+</script>
+</body>
+</html>

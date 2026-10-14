@@ -19,13 +19,16 @@
   button,a.btn{display:block;width:100%;text-align:center;margin-top:18px;padding:14px;font-size:17px;font-family:inherit;border:0;border-radius:10px;background:var(--green);color:#fff;cursor:pointer;text-decoration:none}
   button:disabled{opacity:.6;cursor:default}
   a.alt{background:#fff;color:#4e7d2b;border:1px solid var(--green)}
+  a.wa{background:#1f8f55;margin-top:10px}
   .muted{color:var(--muted);font-size:14px}
   .err{color:#c62828;margin-top:10px;min-height:20px}
+  .warn{color:#8a5a00;font-size:14px;margin-top:6px;min-height:0}
   .offer{background:#fff4e5;border:1px solid #ffb74d;border-radius:10px;padding:10px 12px;margin:10px 0;color:#7a4a00}
   .pill{display:inline-block;padding:4px 12px;border:1px solid var(--line);border-radius:999px;margin:3px;font-size:13px;color:#33414f;background:#fff}
   .pill.apple{background:#000;color:#fff;border-color:#000;font-weight:700}
   .center{text-align:center}
   .hide{display:none !important}
+  .or{text-align:center;color:var(--muted);font-size:14px;margin:18px 0 0}
 </style>
 </head>
 <body>
@@ -35,6 +38,7 @@
 // رابط واجهة Apps Script (ينتهي بـ /exec)
 var API = 'https://script.google.com/macros/s/AKfycbwSHTE4TZz23T1S4dY8dV0AWM7J9f01n00LmKK5GXMm99_Cs6VwKO3Q6fbvdS5ENynl/exec';
 var IG = '@saif_alsalmi_';
+var WA = 'https://wa.me/96896427714?text=' + encodeURIComponent('السلام عليكم أستاذ سيف، دخلت صفحة باقة نجاح وحاب أشترك');
 
 var root = document.getElementById('root');
 var params = new URLSearchParams(location.search);
@@ -57,7 +61,7 @@ function show(title, text, buttons, list) {
     root.appendChild(ul);
   }
   (buttons || []).forEach(function (b) {
-    var a = el('a', { 'class': 'btn' + (b.alt ? ' alt' : ''), href: b.href }, b.text);
+    var a = el('a', { 'class': 'btn' + (b.alt ? ' alt' : '') + (b.wa ? ' wa' : ''), href: b.href }, b.text);
     root.appendChild(a);
   });
 }
@@ -68,6 +72,14 @@ function loadInfo() {
   return getJson(API + '?action=info').then(function (d) { info = d; return d; });
 }
 function homeUrl() { return location.origin + location.pathname; }
+
+// يكمّل الإيميل تلقائياً: إذا كتب الاسم فقط نضيف @gmail.com، ونصحّح أشهر الأخطاء
+function normEmail(v) {
+  v = (v || '').trim().toLowerCase().replace(/\s+/g, '');
+  if (v && v.indexOf('@') < 0) v += '@gmail.com';
+  v = v.replace(/@(gmial|gmal|gamil|gmaill|gmail)\.(con|co|cm|om|comm)$/, '@gmail.com').replace(/@(gmial|gmal|gamil|gmaill)\.com$/, '@gmail.com');
+  return v;
+}
 
 // ---------- صفحة النموذج ----------
 function renderForm() {
@@ -102,16 +114,14 @@ function renderForm() {
     var p2 = el('p'); p2.appendChild(el('b', null, 'السعر: ' + info.price + ' ر.ع')); root.appendChild(p2);
   }
 
-  root.appendChild(el('label', { 'for': 'e1' }, 'بريدك الإلكتروني (حساب Google / Gmail)'));
-  root.appendChild(el('input', { id: 'e1', type: 'email', placeholder: 'name@gmail.com', autocomplete: 'email' }));
-  root.appendChild(el('p', { 'class': 'muted', style: 'margin-top:6px' }, 'ملاحظة: النظام لا يقبل البريد الإلكتروني الوزاري، استخدم حساب Gmail شخصي.'));
-  root.appendChild(el('label', { 'for': 'e2' }, 'أعد كتابة البريد للتأكيد'));
-  root.appendChild(el('input', { id: 'e2', type: 'email', placeholder: 'name@gmail.com' }));
-  root.appendChild(el('p', { 'class': 'muted' }, 'ستُشارَك الحصص على هذا البريد بعد الدفع، فتأكد من كتابته بشكل صحيح.'));
+  root.appendChild(el('label', { 'for': 'e1' }, 'بريدك الإلكتروني (Gmail)'));
+  root.appendChild(el('input', { id: 'e1', type: 'email', placeholder: 'name@gmail.com', autocomplete: 'email', inputmode: 'email' }));
+  root.appendChild(el('p', { 'class': 'muted', style: 'margin-top:6px' }, 'ستُفتح لك الحصص على هذا البريد بعد الدفع مباشرة. لا يقبل النظام البريد الوزاري، استخدم حساب Gmail شخصي.'));
+  root.appendChild(el('div', { 'class': 'warn', id: 'warn' }));
   root.appendChild(el('div', { 'class': 'err', id: 'err' }));
   var btn = el('button', { id: 'btn', type: 'button' }, 'المتابعة إلى الدفع');
   root.appendChild(btn);
-  root.appendChild(el('a', { id: 'pay', 'class': 'btn hide', target: '_blank', rel: 'noopener' }, 'اضغط هنا لإكمال الدفع'));
+  root.appendChild(el('a', { id: 'pay', 'class': 'btn hide', rel: 'noopener' }, 'اضغط هنا لإكمال الدفع'));
 
   var box = el('div', { 'class': 'center', style: 'margin-top:16px' });
   box.appendChild(el('p', { 'class': 'muted', style: 'margin:0 0 6px' }, '🔒 دفع آمن وسلس عبر بوابة ثواني'));
@@ -127,24 +137,34 @@ function renderForm() {
   if (info.paypal) box.appendChild(el('span', { 'class': 'pill' }, 'PayPal'));
   root.appendChild(box);
 
+  root.appendChild(el('p', { 'class': 'or' }, 'ما عندك بطاقة أو تفضّل الدفع بطريقة ثانية؟'));
+  root.appendChild(el('a', { 'class': 'btn wa', href: WA }, 'تواصل مع الأستاذ عبر واتساب'));
+
+  var inp = document.getElementById('e1');
+  inp.addEventListener('blur', function () {
+    var v = normEmail(inp.value); if (v) inp.value = v;
+    var w = document.getElementById('warn');
+    w.textContent = (v && !/@gmail\.com$/.test(v)) ? 'تأكد أن هذا البريد مرتبط بحساب Google، وإلا ما راح تقدر تفتح الحصص.' : '';
+  });
   btn.addEventListener('click', go);
 }
 
 function go() {
-  var a = document.getElementById('e1').value.trim().toLowerCase();
-  var b = document.getElementById('e2').value.trim().toLowerCase();
+  var inp = document.getElementById('e1');
+  var a = normEmail(inp.value); inp.value = a;
   var err = document.getElementById('err');
   var btn = document.getElementById('btn');
   err.textContent = '';
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a)) { err.textContent = 'البريد غير صحيح'; return; }
-  if (a !== b) { err.textContent = 'البريدان غير متطابقين'; return; }
   btn.disabled = true; btn.textContent = 'جارٍ التحويل إلى صفحة الدفع...';
-  fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'create', email: a }) })
+  fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'create', email: a, src: params.get('src') || '' }) })
     .then(function (r) { return r.json(); })
     .then(function (d) {
       if (!d || !d.ok || !d.url) throw new Error('failed');
+      // نحوّل الطالب مباشرة لصفحة الدفع، ونترك زر احتياطي لو المتصفح منع التحويل
       var l = document.getElementById('pay');
       l.href = d.url; l.classList.remove('hide'); btn.classList.add('hide');
+      location.href = d.url;
     })
     .catch(function () {
       btn.disabled = false; btn.textContent = 'المتابعة إلى الدفع';
@@ -157,7 +177,7 @@ function checkStatus(ref, attempt) {
   getJson(API + '?action=status&ref=' + encodeURIComponent(ref)).then(function (d) {
     var s = d && d.status;
     var lessons = (info && info.lessons) || 'https://drive.google.com/drive/shared-with-me';
-    var help = 'للمساعدة تواصل معي على إنستغرام ' + IG;
+    var help = 'للمساعدة تواصل معي على إنستغرام ' + IG + ' أو واتساب 96427714';
     if (s === 'shared') {
       show('تم الدفع بنجاح ✅', 'الحصص المسجلة جاهزة لك الآن.', [{ text: 'الانتقال إلى الحصص المسجلة', href: lessons }], [
         'اضغط الزر أعلاه لفتح الحصص.',
@@ -172,13 +192,13 @@ function checkStatus(ref, attempt) {
         { text: 'تحديث الصفحة', href: location.href, alt: true }
       ], ['انتظر 5 دقائق على الأكثر ثم افتح الحصص.', help]);
     } else if (s === 'cancelled' || s === 'expired') {
-      show('لم تكتمل عملية الدفع', 'لم يتم الدفع لهذه العملية. يمكنك المحاولة من جديد.', [{ text: 'رجوع', href: homeUrl() }]);
+      show('لم تكتمل عملية الدفع', 'لم يتم الدفع لهذه العملية. يمكنك المحاولة من جديد، أو التواصل مع الأستاذ عبر واتساب.', [{ text: 'رجوع', href: homeUrl() }, { text: 'تواصل عبر واتساب', href: WA, wa: true }]);
     } else {
-      show('حدثت مشكلة', 'تواصل معي على إنستغرام ' + IG + ' وأرسل صورة إيصال الدفع لأحلّ الأمر مباشرة.', []);
+      show('حدثت مشكلة', 'تواصل معي على واتساب أو إنستغرام ' + IG + ' وأرسل صورة إيصال الدفع لأحلّ الأمر مباشرة.', [{ text: 'تواصل عبر واتساب', href: WA, wa: true }]);
     }
   }).catch(function () {
-    show('تعذر التحقق الآن', 'إن كنت أتممت الدفع فستصلك الحصص خلال دقائق. وإن لم تصل فتواصل معي على إنستغرام ' + IG + '.', [
-      { text: 'تحديث الصفحة', href: location.href, alt: true }
+    show('تعذر التحقق الآن', 'إن كنت أتممت الدفع فستصلك الحصص خلال دقائق. وإن لم تصل فتواصل معي على إنستغرام ' + IG + ' أو واتساب.', [
+      { text: 'تحديث الصفحة', href: location.href, alt: true }, { text: 'تواصل عبر واتساب', href: WA, wa: true }
     ]);
   });
 }
@@ -189,12 +209,12 @@ loadInfo().then(function () {
     show('نتأكد من الدفع...', 'لحظات من فضلك.', []);
     checkStatus(params.get('done'), 0);
   } else if (params.get('cancel')) {
-    show('تم إلغاء عملية الدفع', 'لم يُخصم أي مبلغ. تستطيع العودة والمحاولة من جديد.', [{ text: 'رجوع', href: homeUrl() }]);
+    show('تم إلغاء عملية الدفع', 'لم يُخصم أي مبلغ. تستطيع العودة والمحاولة من جديد، أو التواصل مع الأستاذ عبر واتساب.', [{ text: 'رجوع', href: homeUrl() }, { text: 'تواصل عبر واتساب', href: WA, wa: true }]);
   } else {
     renderForm();
   }
 }).catch(function () {
-  show('تعذر تحميل الصفحة', 'تأكد من اتصالك بالإنترنت ثم حدّث الصفحة.', [{ text: 'تحديث الصفحة', href: location.href }]);
+  show('تعذر تحميل الصفحة', 'تأكد من اتصالك بالإنترنت ثم حدّث الصفحة.', [{ text: 'تحديث الصفحة', href: location.href }, { text: 'تواصل عبر واتساب', href: WA, wa: true }]);
 });
 </script>
 </body>

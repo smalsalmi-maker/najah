@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تواصل مع أ. سيف السالمي</title>
+<style>body{font-family:Tahoma,Arial,sans-serif;background:#f6f7f4;margin:0;padding:24px;text-align:center;color:#1d2b3a}
+a{display:block;max-width:420px;margin:24px auto;padding:16px;border-radius:12px;background:#1f8f55;color:#fff;font-size:19px;text-decoration:none}</style>
+</head><body>
+<p>جاري فتح الواتساب...</p>
+<a id="go" href="#">اضغط هنا إذا ما انفتح الواتساب</a>
+<script>
+var msg = new URLSearchParams(location.search).get('m') || 'السلام عليكم أستاذ سيف، وصلتني رسالة الحصص وحاب أشترك';
+var url = 'https://wa.me/96877441470?text=' + encodeURIComponent(msg);
+document.getElementById('go').href = url;
+location.replace(url);
+</script>
+</body></html>

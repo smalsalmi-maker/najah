@@ -38,7 +38,7 @@
 // رابط واجهة Apps Script (ينتهي بـ /exec)
 var API = 'https://script.google.com/macros/s/AKfycbwSHTE4TZz23T1S4dY8dV0AWM7J9f01n00LmKK5GXMm99_Cs6VwKO3Q6fbvdS5ENynl/exec';
 var IG = '@saif_alsalmi_';
-var WA = 'https://wa.me/96896427714?text=' + encodeURIComponent('السلام عليكم أستاذ سيف، دخلت صفحة باقة نجاح وحاب أشترك');
+var WA = 'https://api.whatsapp.com/send?phone=96877441470&text=' + encodeURIComponent('السلام عليكم أستاذ سيف، دخلت صفحة باقة نجاح وحاب أشترك');
 
 var root = document.getElementById('root');
 var params = new URLSearchParams(location.search);
@@ -93,7 +93,7 @@ function renderForm() {
     'مناقشة في نهاية كل درس.',
     'مراجعات في ختام كل وحدة.',
     'إمكانية الرجوع إلى أي درس في أي وقت.',
-    'تستطيع مراجعة الأستاذ في أي وقت عبر إنستغرام ' + IG + ' أو عبر الهاتف ' + info.phone + '.',
+    'تستطيع مراجعة الأستاذ في أي وقت عبر إنستغرام ' + IG + ' أو واتساب 77441470.',
     'استمرار الحصص حتى نهاية الفصل دون انقطاع.',
     'إن واجهتك أي مشكلة فتواصل مع الأستاذ مباشرة وسيتم حلّها.'
   ].forEach(function (t) { ul.appendChild(el('li', null, t)); });
@@ -177,7 +177,7 @@ function checkStatus(ref, attempt) {
   getJson(API + '?action=status&ref=' + encodeURIComponent(ref)).then(function (d) {
     var s = d && d.status;
     var lessons = (info && info.lessons) || 'https://drive.google.com/drive/shared-with-me';
-    var help = 'للمساعدة تواصل معي على إنستغرام ' + IG + ' أو واتساب 96427714';
+    var help = 'للمساعدة تواصل معي على إنستغرام ' + IG + ' أو واتساب 77441470';
     if (s === 'shared') {
       show('تم الدفع بنجاح ✅', 'الحصص المسجلة جاهزة لك الآن.', [{ text: 'الانتقال إلى الحصص المسجلة', href: lessons }], [
         'اضغط الزر أعلاه لفتح الحصص.',

@@ -1,0 +1,44 @@
+<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>تسجيل حصص الأحياء أونلاين - الصف الثاني عشر</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f3f7f1;color:#1f2d1f}
+.card{max-width:460px;margin:24px auto;background:#fff;border-radius:18px;padding:24px 20px;box-shadow:0 6px 24px rgba(0,0,0,.07)}
+h1{font-size:21px;margin:0 0 6px}p.sub{margin:0 0 18px;color:#556b55;font-size:14px;line-height:1.8}
+label{display:block;font-size:14px;margin:12px 0 6px;font-weight:bold}
+input[type=text],input[type=email],input[type=tel]{width:100%;padding:12px;border:1px solid #cfdccf;border-radius:10px;font-size:16px}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin-top:14px;font-weight:normal}
+button,.btn{display:block;width:100%;text-align:center;margin-top:18px;padding:14px;border:0;border-radius:12px;background:#2e7d32;color:#fff;font-size:17px;font-weight:bold;text-decoration:none;cursor:pointer}
+.btn.wa{background:#25d366}.btn.cal{background:#fff;color:#2e7d32;border:2px solid #2e7d32}
+.box{background:#eef7ee;border-radius:12px;padding:14px;margin-top:14px;line-height:1.9}
+.err{color:#b00020;font-size:14px;margin-top:10px}.hide{display:none}
+</style></head><body><div class="card">
+<div id="formView">
+<h1>🌿 تسجيل حصص الأحياء أونلاين - الصف الثاني عشر</h1>
+<p class="sub">سجّل بياناتك وبيطلع لك رابط الحصة مباشرة، ويوصلك على إيميلك مع التذكيرات قبل الحصة. بياناتك للتذكير بالحصص فقط.</p>
+<form id="f">
+<label>الاسم</label><input type="text" name="name" required>
+<label>الإيميل (Gmail)</label><input type="email" name="email" required dir="ltr">
+<label>رقم الواتساب</label><input type="tel" name="phone" required dir="ltr" placeholder="9XXXXXXX">
+<label class="chk"><input type="checkbox" name="consent" checked> أوافق على استقبال تذكير الحصص على الواتساب</label>
+<button id="b" type="submit">سجّل وخذ الرابط</button><div id="e" class="err"></div>
+</form></div>
+<div id="doneView" class="hide">
+<h1>✅ تم تسجيلك، حيّاك الله</h1>
+<p class="sub">هذه الحصة مهمة جداً، فاحرص تحضر من البداية وجهّز دفترك.</p>
+<div class="box">📅 <b>الموعد:</b> <span id="ct"></span><br>📩 أرسلنا لك الرابط على إيميلك، وبتوصلك تذكيرات قبل الحصة.</div>
+<a id="meet" class="btn" target="_blank">رابط الحصة (افتحه يوم السبت 10 الصبح)</a>
+<a id="cal" class="btn cal" target="_blank">أضف الحصة لتقويمك</a>
+<a id="wa" class="btn wa hide" target="_blank">تابع قناة واتساب «كي نحب الأحياء» 🔔</a>
+</div></div>
+<script>
+document.getElementById('f').addEventListener('submit',function(ev){ev.preventDefault();
+var f=ev.target,b=document.getElementById('b'),e=document.getElementById('e');e.textContent='';b.disabled=true;b.textContent='لحظة...';
+var API='https://script.google.com/macros/s/AKfycbxtPHxSPCTZSPORzmeVbvn9GxwB39RtKAC5GGJwDnWiLV9m9BCL-3tizgyjZ0vVBQmJ/exec';
+var data={name:f.name.value,email:f.email.value,phone:f.phone.value,consent:f.consent.checked};
+function fail(m){e.textContent=m||'صار خطأ، حاول مرة ثانية';b.disabled=false;b.textContent='سجّل وخذ الرابط';}
+fetch(API,{method:'POST',body:JSON.stringify(data)}).then(function(x){return x.json();}).then(function(r){
+if(!r.ok){fail(r.error);return;}
+document.getElementById('ct').textContent=r.classText;document.getElementById('meet').href=r.meet;document.getElementById('cal').href=r.cal;
+if(r.wa){var w=document.getElementById('wa');w.href=r.wa;w.classList.remove('hide');}
+document.getElementById('formView').classList.add('hide');document.getElementById('doneView').classList.remove('hide');window.scrollTo(0,0);
+}).catch(function(){fail('تعذر الاتصال، تأكد من الإنترنت وحاول مرة ثانية');});});
+</script></body></html>
